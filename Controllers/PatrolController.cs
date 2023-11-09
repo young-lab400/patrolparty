@@ -43,7 +43,10 @@ namespace FaceIDAPI.Controllers
                 Response.StatusCode = 404;
                 return null;
             }
-            return Ok(result);
+            string mailresult = this._patrolRepository.SendEmail(dt2,result);
+
+
+            return Ok(mailresult);
             //return result;
         }
       
