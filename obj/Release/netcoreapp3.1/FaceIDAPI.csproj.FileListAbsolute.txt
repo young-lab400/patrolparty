@@ -174,3 +174,5 @@ D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\staticwebassets\msbuil
 D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\FaceIDAPI.RazorTargetAssemblyInfo.cache
 D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\FaceIDAPI.csproj.CopyComplete
 D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\FaceIDAPI.genruntimeconfig.cache
+D:\Dev\巡邏系統\patrolparty\bin\Release\netcoreapp3.1\APP_DATA\data.json
+D:\Dev\巡邏系統\patrolparty\bin\Release\netcoreapp3.1\Newtonsoft.Json.dll

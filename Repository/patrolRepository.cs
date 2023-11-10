@@ -9,14 +9,18 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Net.Http.Headers;
+using System.Net.Http;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using System.Net;
 
 namespace FaceIDAPI.Repository
 {
     public class patrolRepository:MysqlHelper
     {
+    
         public IEnumerable<patrolrecord> Get_recordList(DateTime dt)
         {
             using (var conn = new MySqlConnection(ConnectionStrings))
@@ -63,13 +67,13 @@ namespace FaceIDAPI.Repository
                 ///逾期巡邏統計
                 List<patrol_cal> patrolerrorrecord = conn.Query<patrol_cal>("SELECT pointId as patrolPointId,COUNT(*) as count FROM patrolerrorrecord where startTime like @term and unitId like @term1 GROUP BY pointId", new { term = term, term1 = term1 }).ToList();
 
-                //                WITH
-                //  cte AS(SELECT distinct pointId FROM patrolerrorrecord WHERE startTime like @term AND unitId LIKE @term1)
-                //, cte1 AS(SELECT patrolPointId, patrolPointName FROM patrolrecord WHERE patrolTime like @term AND unitId LIKE @term1)
-                // SELECT cte1.patrolPointId,cte1.patrolPointName,COUNT(cte1.patrolPointId) FROM cte1 JOIN cte
-                // WHERE cte.pointId = cte1.patrolPointId
-                // GROUP BY cte1.patrolPointId
-                
+  //              WITH
+  //cte AS(SELECT distinct pointId FROM patrolerrorrecord WHERE startTime like @term AND unitId LIKE @term1)
+  //              , cte1 AS(SELECT patrolPointId, patrolPointName FROM patrolrecord WHERE patrolTime like @term AND unitId LIKE @term1)
+  //               SELECT cte1.patrolPointId,cte1.patrolPointName,COUNT(cte1.patrolPointId) FROM cte1 JOIN cte
+  //               WHERE cte.pointId = cte1.patrolPointId
+  //               GROUP BY cte1.patrolPointId
+
                 ///實際巡邏統計
                 List<patrol_cal> patrolrecord = conn.Query<patrol_cal>("WITH cte AS(SELECT distinct pointId FROM patrolerrorrecord WHERE startTime like @term AND unitId LIKE @term1),cte1 AS(SELECT patrolPointId, patrolPointName FROM patrolrecord WHERE patrolTime like @term AND unitId LIKE @term1) SELECT cte1.patrolPointId,COUNT(cte1.patrolPointId) AS count FROM cte1 JOIN cte WHERE cte.pointId = cte1.patrolPointId GROUP BY cte1.patrolPointId", new { term = term, term1 = term1 }).ToList();
 
@@ -90,15 +94,31 @@ namespace FaceIDAPI.Repository
                 return query;
             }
         }
+        public string LineNotify(string token, string message)
+        {
+            System.Net.ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+            System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+            HttpClient httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var content = new Dictionary<string, string>();
+            content.Add("message", message);
+            try
+            {
+                var result =  httpClient.PostAsync("https://notify-api.line.me/api/notify", new FormUrlEncodedContent(content));
+                return "成功";
+            }
+            catch (Exception ex)
+            {
+                return ex.ToString();
+            }
+        }
         public string SendEmail(DateTime dt, IEnumerable<patrol_caltable> data)
         {
         
             MailMessage mail = new MailMessage();
-
-            SmtpClient SmtpServer = new SmtpClient("spam.csc.com.tw");
-
-
-          
+            SmtpClient SmtpServer = new SmtpClient("spam.csc.com.tw");         
             string body = "<h1>"+ dt.Year.ToString() + "/"+ dt.Month.ToString() + "/"+ dt.Day.ToString() + " 巡邏逾期情形</h1>";
             body += "<table border='1'>";
             body += "<tr>";
@@ -112,10 +132,10 @@ namespace FaceIDAPI.Repository
             body += "未巡";
             body += "</th>";
             body += "<th>";
-            body += "實巡";
+            body += "應巡";
             body += "</th>";
             body += "<th>";
-            body += "應巡";
+            body += "實巡";
             body += "</th>";
             body += "</tr>";
             foreach (patrol_caltable obj in data)
@@ -131,10 +151,10 @@ namespace FaceIDAPI.Repository
                 body += obj.count;
                 body += "</td>";
                 body += "<td>";
-                body += obj.count1;
+                body += obj.count2;
                 body += "</td>";
                 body += "<td>";
-                body += obj.count2;
+                body += obj.count1;
                 body += "</td>";
                 body += "</tr>";
             }

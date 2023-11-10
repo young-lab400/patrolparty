@@ -1,6 +1,7 @@
 D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\PubTmp\Out\FaceIDAPI.exe
 D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\PubTmp\Out\appsettings.Development.json
 D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\PubTmp\Out\appsettings.json
+D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\PubTmp\Out\APP_DATA\data.json
 D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\PubTmp\Out\APP_DATA\FaceID.postman_collection.json
 D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\PubTmp\Out\FaceIDAPI.dll
 D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\PubTmp\Out\FaceIDAPI.deps.json
@@ -12,6 +13,7 @@ D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\PubTmp\Out\Microsoft.E
 D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\PubTmp\Out\Microsoft.Extensions.Configuration.Binder.dll
 D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\PubTmp\Out\Microsoft.Extensions.Primitives.dll
 D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\PubTmp\Out\MySqlConnector.dll
+D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\PubTmp\Out\Newtonsoft.Json.dll
 D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\PubTmp\Out\Serilog.dll
 D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\PubTmp\Out\Serilog.Extensions.Logging.dll
 D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\PubTmp\Out\Serilog.Extensions.Logging.File.dll
