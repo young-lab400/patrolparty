@@ -56,7 +56,7 @@ namespace FaceIDAPI.Controllers
                     return "統計錯誤";
                 }
                 string mailresult = this._patrolRepository.SendEmail(dt2, result);
-                //return Ok(mailresult);
+                //return Ok(result);
             }
             catch (Exception ex)
             {
