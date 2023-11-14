@@ -22,35 +22,19 @@ namespace FaceIDAPI.Repository
     public class patrolRepository : MysqlHelper
     {
 
-        public IEnumerable<patrolrecord> Get_recordList(DateTime dt)
-        {
-            using (var conn = new MySqlConnection(ConnectionStrings))
-            {
-                string term = "%" + dt.ToString("yyyy-MM-dd") + "%";
-                var result = conn.Query<patrolrecord>("SELECT * FROM patrolrecord Where patrolTime like @term", new
-                {
-                    term = term
-                });
-                return result;
-            }
-        }
-        public IEnumerable<patrolerrorrecord> Get_errorrecordList(DateTime dt, string depart)
-        {
-            using (var conn = new MySqlConnection(ConnectionStrings))
-            {
-                string term = "%" + dt.ToString("yyyy-MM-dd") + "%";
-                string term1 = depart + "%";
-                var result = conn.Query<patrolerrorrecord>("SELECT * FROM patrolerrorrecord where startTime like @term and unitId like @term1", new { term = term, term1 = term1 });
-                return result;
-            }
-        }
+        /// <summary>
+        /// 計算應巡邏次數,逾期次數,實際巡邏次數
+        /// </summary>
+        /// <param name="dt">'2023-10-10' 時間點</param>
+        /// <param name="depart">'AK' 單位代號</param>
+        /// <returns></returns>
         public IEnumerable<patrol_caltable> Get_pointList(DateTime dt, string depart)
         {
             using (var conn = new MySqlConnection(ConnectionStrings))
             {
                 string term1 = depart + "%";
-                string term = dt.ToString("yyyy-MM-dd") + "%";
-                string dt2 = dt.ToString("yyyy-MM-dd");
+                string term = dt.AddDays(-1).ToString("yyyy-MM-dd") + "%";
+                string dt2 = dt.AddDays(-1).ToString("yyyy-MM-dd");
 
                 //SELECT patrolpoint.pointId as patrolPointId,SUM(CASE when convert(TIMESTAMPDIFF(MINUTE, CONCAT(DATE_SUB(CURDATE(), INTERVAL 1 DAY), ' ', patrolcycle.startHour, ':', LPAD(patrolcycle.startMinute, 2, '0'), ':00'), CONCAT(DATE_SUB(CURDATE(), INTERVAL 1 DAY), ' ', patrolcycle.endHour, ':', LPAD(patrolcycle.endMinute, 2, '0'), ':00')), SIGNED) = 0 then 1440 DIV hoursPerTime ELSE mod(1440 + convert(TIMESTAMPDIFF(MINUTE, CONCAT(DATE_SUB(CURDATE(), INTERVAL 1 DAY), ' ', patrolcycle.startHour, ':', LPAD(patrolcycle.startMinute, 2, '0'), ':00'), CONCAT(DATE_SUB(CURDATE(), INTERVAL 1 DAY), ' ', patrolcycle.endHour, ':', LPAD(patrolcycle.endMinute, 2, '0'), ':00')), SIGNED), 1440) DIV hoursPerTime END) as count FROM patrolpoint JOIN patrolcycle
                 //WHERE patrolpoint.unid = patrolcycle.pointUnid
@@ -196,6 +180,7 @@ namespace FaceIDAPI.Repository
 
             mail.From = new MailAddress("hr_system@csccss.com.tw", "hr_system@csccss.com.tw");
             mail.To.Add(new MailAddress("S66995@csccss.com.tw", "廖健智"));
+            mail.To.Add(new MailAddress("S33141@csccss.com.tw", "林榮皇"));
             mail.Subject = "巡邏逾期情形";
             mail.Body = body;
             mail.IsBodyHtml = true;
@@ -213,6 +198,21 @@ namespace FaceIDAPI.Repository
             catch (Exception ex)
             {
                 return ex.ToString();
+            }
+        }
+        /// <summary>
+        /// 取得長達3天以上的逾期紀錄
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<patrol_caltable> geterrorhistory(DateTime dt,string depart,int num)
+        {
+            string term1 = depart + "%";
+            int num1 = 0 - num;
+            string dt2 = dt.AddDays(num1).ToString("yyyy-MM-dd");
+            using (var conn = new MySqlConnection(ConnectionStrings))
+            {
+                IEnumerable<patrol_caltable> result = conn.Query<patrol_caltable>("WITH rawbyday AS (SELECT pointId,pointName,DATE(startTime) AS startDate,COUNT(*) AS count from patrolerrorrecord WHERE startTime >= @dt2 AND startTime < @dt AND pointId LIKE @term1 GROUP BY pointId,DATE(startTime)),result AS ( SELECT pointId AS patrolPointId,pointName AS patrolPointName,COUNT(pointId) AS count,COUNT(pointId) AS COUNT1,COUNT(pointId) AS COUNT2 FROM  rawbyday GROUP BY pointId)  SELECT * FROM result WHERE COUNT = @num ", new { dt2 = dt2,dt = dt.ToString("yyyy-MM-dd"), term1 = term1 , num = num });
+                return result;
             }
         }
     }

@@ -44,18 +44,19 @@ namespace FaceIDAPI.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("{depart}")]
-        public ActionResult<string> Get_patrolpoint(string dt,string depart)
+        public ActionResult<string> Get_patrolpoint(string dt,string depart,int num)
         {
             DateTime dt2 = DateTime.Parse(dt);
+
             try
             {
-                var result = this._patrolRepository.Get_pointList(dt2, depart);
-                if (result is null)
+                var result2 = this._patrolRepository.Get_pointList(dt2, depart);
+                if (result2 is null)
                 {
                     Response.StatusCode = 404;
                     return "統計錯誤";
                 }
-                string mailresult = this._patrolRepository.SendEmail(dt2, result);
+                string mailresult = this._patrolRepository.SendEmail(dt2.AddDays(-1), result2);
                 //return Ok(result);
             }
             catch (Exception ex)
@@ -66,6 +67,8 @@ namespace FaceIDAPI.Controllers
             string webRootPath = _hostingEnvironment.WebRootPath;
             try
             {
+                IEnumerable<patrol_caltable> result = this._patrolRepository.geterrorhistory(dt2, depart, num);
+                 
                 StreamReader reader = new StreamReader(webRootPath + "/APIpub/APP_DATA/data.json");
 
                 var json = reader.ReadToEnd();
@@ -76,7 +79,13 @@ namespace FaceIDAPI.Controllers
                     if (item.key == "Linetoken")
                     {
                         string linetoken = item.value;
-                        Lineresult = this._patrolRepository.LineNotify(linetoken, depart);
+                        string msg = "";
+                        foreach (var rawdata in result)
+                        {
+                            //msg += rawdata.patrolPointId + " " +rawdata.patrolPointName+" " +rawdata.count + "次";
+                            msg += rawdata.patrolPointId + " 連續" + rawdata.count + "天逾期";
+                        }
+                        Lineresult = this._patrolRepository.LineNotify(linetoken, msg);
                     }
                 }
                 return Ok(Lineresult);
