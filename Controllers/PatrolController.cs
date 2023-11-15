@@ -44,20 +44,57 @@ namespace FaceIDAPI.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("{depart}")]
-        public ActionResult<string> Get_patrolpoint(string dt,string depart,int num)
+        public ActionResult<string> Get_patrolpoint(string dt,string depart,int num,int opt)
         {
             DateTime dt2 = DateTime.Parse(dt);
 
             try
             {
-                var result2 = this._patrolRepository.Get_pointList(dt2, depart);
-                if (result2 is null)
+             
+                if (opt == 1)
                 {
-                    Response.StatusCode = 404;
-                    return "統計錯誤";
+                    var result2 = this._patrolRepository.Get_pointList1(dt2, depart);
+                    if (result2 is null)
+                    {
+                        Response.StatusCode = 404;
+                        return "統計錯誤";
+                    }
+                    //string mailresult = this._patrolRepository.SendEmail(dt2.AddDays(-1), result2);
+                    return Ok(result2);
                 }
-                string mailresult = this._patrolRepository.SendEmail(dt2.AddDays(-1), result2);
-                //return Ok(result);
+                else if (opt == 2)
+                {
+                    var result2 = this._patrolRepository.Get_pointList2(dt2, depart);
+                    if (result2 is null)
+                    {
+                        Response.StatusCode = 404;
+                        return "統計錯誤";
+                    }
+                    //string mailresult = this._patrolRepository.SendEmail(dt2.AddDays(-1), result2);
+                    return Ok(result2);
+                }
+                else if (opt == 3)
+                {
+                    var result2 = this._patrolRepository.Get_pointList3(dt2, depart);
+                    if (result2 is null)
+                    {
+                        Response.StatusCode = 404;
+                        return "統計錯誤";
+                    }
+                    //string mailresult = this._patrolRepository.SendEmail(dt2.AddDays(-1), result2);
+                    return Ok(result2);
+                }
+                else
+                {
+                    var result2 = this._patrolRepository.Get_pointList(dt2, depart);
+                    if (result2 is null)
+                    {
+                        Response.StatusCode = 404;
+                        return "統計錯誤";
+                    }
+                    string mailresult = this._patrolRepository.SendEmail(dt2.AddDays(-1), result2);
+                    //return Ok(result2);
+                }
             }
             catch (Exception ex)
             {
@@ -83,8 +120,9 @@ namespace FaceIDAPI.Controllers
                         foreach (var rawdata in result)
                         {
                             //msg += rawdata.patrolPointId + " " +rawdata.patrolPointName+" " +rawdata.count + "次";
-                            msg += rawdata.patrolPointId + " 連續" + rawdata.count + "天逾期";
+                            msg += rawdata.patrolPointId + ",";
                         }
+                        msg += " 連續" + num+ "天逾期";
                         Lineresult = this._patrolRepository.LineNotify(linetoken, msg);
                     }
                 }

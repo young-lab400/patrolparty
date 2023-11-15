@@ -2,6 +2,7 @@
 {
     public class patrol_caltable
     {
+        public string unitId { get; set; }
         public string patrolPointId { get; set; }
         public string patrolPointName { get; set; }
         public int count { get; set; }

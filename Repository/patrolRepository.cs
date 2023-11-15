@@ -21,6 +21,41 @@ namespace FaceIDAPI.Repository
 {
     public class patrolRepository : MysqlHelper
     {
+        public IEnumerable<patrol_count> Get_pointList1(DateTime dt, string depart)
+        {
+            using (var conn = new MySqlConnection(ConnectionStrings))
+            {
+                string term1 = depart + "%";
+                string term = dt.AddDays(-1).ToString("yyyy-MM-dd") + "%";
+                string dt2 = dt.AddDays(-1).ToString("yyyy-MM-dd");
+                List<patrol_count> patrolcorrecord = conn.Query<patrol_count>("WITH papoint AS(SELECT unid,unitId, pointId, pointName FROM patrolpoint WHERE patrolpoint.pointId LIKE @term1),errorrecord AS(SELECT distinct unitId,pointId FROM patrolerrorrecord WHERE patrolerrorrecord.startTime like @term),cycleexp AS(SELECT * FROM patrolcycleexp WHERE (REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(patrolcycleexp.`week`,'六','5'),'日','6') ,'一','0'),'二','1'),'三','2'),'四','3'),'五','4') = WEEKDAY(@Date)) OR(patrolcycleexp.startDate <= @Date AND patrolcycleexp.endDate >= @Date)),cycle AS(SELECT * from patrolcycle) SELECT papoint.unitId,papoint.pointId as pointId,IFNULL(SUM(CASE when convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycleexp.startHour, ':', LPAD(cycleexp.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycleexp.endHour, ':', LPAD(cycleexp.endMinute, 2, '0'), ':00')), SIGNED) = 0 then 1440 DIV cycleexp.hoursPerTime ELSE mod(1440 + convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycleexp.startHour, ':', LPAD(cycleexp.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycleexp.endHour, ':', LPAD(cycleexp.endMinute, 2, '0'), ':00')), SIGNED), 1440) DIV cycleexp.hoursPerTime END),0) as cycleexpcount,IFNULL(SUM(CASE when convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycle.startHour, ':', LPAD(cycle.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycle.endHour, ':', LPAD(cycle.endMinute, 2, '0'), ':00')), SIGNED) = 0 then 1440 DIV cycle.hoursPerTime ELSE mod(1440 + convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycle.startHour, ':', LPAD(cycle.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycle.endHour, ':', LPAD(cycle.endMinute, 2, '0'), ':00')), SIGNED), 1440) DIV cycle.hoursPerTime END),0) as cyclecount FROM papoint inner JOIN errorrecord ON papoint.pointId = errorrecord.pointId and papoint.unitId = errorrecord.unitId left JOIN cycleexp ON papoint.unid = cycleexp.pointUnid left JOIN cycle ON papoint.unid = cycle.pointUnid GROUP BY papoint.pointId ", new { term = term, term1 = term1, Date = dt2 }).ToList();
+                return patrolcorrecord;
+            }
+        }
+        public IEnumerable<patrol_cal> Get_pointList2(DateTime dt, string depart)
+        {
+            using (var conn = new MySqlConnection(ConnectionStrings))
+            {
+                string term1 = depart + "%";
+                string term = dt.AddDays(-1).ToString("yyyy-MM-dd") + "%";
+                string dt2 = dt.AddDays(-1).ToString("yyyy-MM-dd");
+                List<patrol_cal> patrolerrorrecord = conn.Query<patrol_cal>("SELECT unitId,pointId ,COUNT(*) as count FROM patrolerrorrecord where startTime like @term and unitId like @term1 GROUP BY pointId", new { term = term, term1 = term1 }).ToList();
+
+                return patrolerrorrecord;
+            }
+        }
+        public IEnumerable<patrol_cal> Get_pointList3(DateTime dt, string depart)
+        {
+            using (var conn = new MySqlConnection(ConnectionStrings))
+            {
+                string term1 = depart + "%";
+                string term = dt.AddDays(-1).ToString("yyyy-MM-dd") + "%";
+                string dt2 = dt.AddDays(-1).ToString("yyyy-MM-dd");
+                ///實際巡邏統計
+                List<patrol_cal> patrolrecord = conn.Query<patrol_cal>("WITH cte AS(SELECT distinct unitId,pointId FROM patrolerrorrecord WHERE startTime like @term AND unitId LIKE @term1),cte1 AS(SELECT unitId,patrolPointId, patrolPointName FROM patrolrecord WHERE patrolTime like @term AND unitId LIKE @term1) SELECT cte.unitId,cte.pointId as pointId,COUNT(cte1.patrolPointId) AS count FROM cte left JOIN cte1 on cte.pointId = cte1.patrolPointId  and cte.unitId = cte1.unitId GROUP BY cte1.patrolPointId", new { term = term, term1 = term1 }).ToList();
+                return patrolrecord;
+            }
+        }
 
         /// <summary>
         /// 計算應巡邏次數,逾期次數,實際巡邏次數
@@ -36,72 +71,56 @@ namespace FaceIDAPI.Repository
                 string term = dt.AddDays(-1).ToString("yyyy-MM-dd") + "%";
                 string dt2 = dt.AddDays(-1).ToString("yyyy-MM-dd");
 
-                //SELECT patrolpoint.pointId as patrolPointId,SUM(CASE when convert(TIMESTAMPDIFF(MINUTE, CONCAT(DATE_SUB(CURDATE(), INTERVAL 1 DAY), ' ', patrolcycle.startHour, ':', LPAD(patrolcycle.startMinute, 2, '0'), ':00'), CONCAT(DATE_SUB(CURDATE(), INTERVAL 1 DAY), ' ', patrolcycle.endHour, ':', LPAD(patrolcycle.endMinute, 2, '0'), ':00')), SIGNED) = 0 then 1440 DIV hoursPerTime ELSE mod(1440 + convert(TIMESTAMPDIFF(MINUTE, CONCAT(DATE_SUB(CURDATE(), INTERVAL 1 DAY), ' ', patrolcycle.startHour, ':', LPAD(patrolcycle.startMinute, 2, '0'), ':00'), CONCAT(DATE_SUB(CURDATE(), INTERVAL 1 DAY), ' ', patrolcycle.endHour, ':', LPAD(patrolcycle.endMinute, 2, '0'), ':00')), SIGNED), 1440) DIV hoursPerTime END) as count FROM patrolpoint JOIN patrolcycle
-                //WHERE patrolpoint.unid = patrolcycle.pointUnid
-                //GROUP BY patrolpoint.pointId
-                ///巡邏點應巡次數
-                //List<patrol_cal> patrolcorrecord = conn.Query<patrol_cal>("SELECT patrolpoint.pointId as patrolPointId,SUM(CASE when convert(TIMESTAMPDIFF(MINUTE, CONCAT(DATE_SUB(CURDATE(), INTERVAL 1 DAY), ' ', patrolcycle.startHour, ':', LPAD(patrolcycle.startMinute, 2, '0'), ':00'), CONCAT(DATE_SUB(CURDATE(), INTERVAL 1 DAY), ' ', patrolcycle.endHour, ':', LPAD(patrolcycle.endMinute, 2, '0'), ':00')), SIGNED) = 0 then 1440 DIV hoursPerTime ELSE mod(1440 + convert(TIMESTAMPDIFF(MINUTE, CONCAT(DATE_SUB(CURDATE(), INTERVAL 1 DAY), ' ', patrolcycle.startHour, ':', LPAD(patrolcycle.startMinute, 2, '0'), ':00'), CONCAT(DATE_SUB(CURDATE(), INTERVAL 1 DAY), ' ', patrolcycle.endHour, ':', LPAD(patrolcycle.endMinute, 2, '0'), ':00')), SIGNED), 1440) DIV hoursPerTime END) as count FROM patrolpoint JOIN patrolcycle WHERE patrolpoint.unid = patrolcycle.pointUnid GROUP BY patrolpoint.pointId ").ToList();
-
-
                 ///巡邏點例外應巡次數 + 應巡次數
-                //           WITH
-                //papoint AS(SELECT unid, pointId, pointName FROM patrolpoint WHERE patrolpoint.pointId LIKE 'AK%'),
-                //           	errorrecord AS(SELECT distinct pointId FROM patrolerrorrecord WHERE patrolerrorrecord.startTime like '2023-10-10%'),
-                //           	cycleexp AS(SELECT * FROM patrolcycleexp WHERE (REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(patrolcycleexp.`week`,'六','5'),'日','6') ,'一','0'),'二','1'),'三','2'),'四','3'),'五','4') = WEEKDAY('2023-10-10'))
-                //           	 OR(patrolcycleexp.startDate <= '2023-10-10' AND patrolcycleexp.endDate >= '2023-10-10')),
-                //           	cycle AS(SELECT * from patrolcycle)
-                //           SELECT papoint.pointId
-                //           ,SUM(CASE when
-
-                //               convert(TIMESTAMPDIFF(MINUTE, CONCAT('2023-10-10', ' ', cycleexp.startHour, ':', LPAD(cycleexp.startMinute, 2, '0'), ':00'), CONCAT('2023-10-10', ' ', cycleexp.endHour, ':', LPAD(cycleexp.endMinute, 2, '0'), ':00')), SIGNED) = 0
-
-                //               then 1440 DIV cycleexp.hoursPerTime
-
-                //               ELSE
-
-                //               mod(1440 + convert(TIMESTAMPDIFF(MINUTE, CONCAT('2023-10-10', ' ', cycleexp.startHour, ':', LPAD(cycleexp.startMinute, 2, '0'), ':00'), CONCAT('2023-10-10', ' ', cycleexp.endHour, ':', LPAD(cycleexp.endMinute, 2, '0'), ':00')), SIGNED), 1440) DIV cycleexp.hoursPerTime END) as cycleexpcount
-                //           ,SUM(CASE when
-
-                //               convert(TIMESTAMPDIFF(MINUTE, CONCAT('2023-10-10', ' ', cycle.startHour, ':', LPAD(cycle.startMinute, 2, '0'), ':00'), CONCAT('2023-10-10', ' ', cycle.endHour, ':', LPAD(cycle.endMinute, 2, '0'), ':00')), SIGNED) = 0
-
-                //               then 1440 DIV cycle.hoursPerTime
-
-                //               ELSE
-
-                //               mod(1440 + convert(TIMESTAMPDIFF(MINUTE, CONCAT('2023-10-10', ' ', cycle.startHour, ':', LPAD(cycle.startMinute, 2, '0'), ':00'), CONCAT('2023-10-10', ' ', cycle.endHour, ':', LPAD(cycle.endMinute, 2, '0'), ':00')), SIGNED), 1440) DIV cycle.hoursPerTime END) as cyclecount
-                //           FROM papoint
-                //           inner JOIN errorrecord ON papoint.pointId = errorrecord.pointId
-                //           left JOIN cycleexp ON papoint.unid = cycleexp.pointUnid
-                //           left JOIN cycle ON papoint.unid = cycle.pointUnid
-                //           GROUP BY papoint.pointId
-                List<patrol_count> patrolcorrecord = conn.Query<patrol_count>("WITH papoint AS(SELECT unid, pointId, pointName FROM patrolpoint WHERE patrolpoint.pointId LIKE @term1),errorrecord AS(SELECT distinct pointId FROM patrolerrorrecord WHERE patrolerrorrecord.startTime like @term),cycleexp AS(SELECT * FROM patrolcycleexp WHERE (REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(patrolcycleexp.`week`,'六','5'),'日','6') ,'一','0'),'二','1'),'三','2'),'四','3'),'五','4') = WEEKDAY(@Date)) OR(patrolcycleexp.startDate <= @Date AND patrolcycleexp.endDate >= @Date)),cycle AS(SELECT * from patrolcycle) SELECT papoint.pointId as patrolPointId,IFNULL(SUM(CASE when convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycleexp.startHour, ':', LPAD(cycleexp.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycleexp.endHour, ':', LPAD(cycleexp.endMinute, 2, '0'), ':00')), SIGNED) = 0 then 1440 DIV cycleexp.hoursPerTime ELSE mod(1440 + convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycleexp.startHour, ':', LPAD(cycleexp.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycleexp.endHour, ':', LPAD(cycleexp.endMinute, 2, '0'), ':00')), SIGNED), 1440) DIV cycleexp.hoursPerTime END),0) as cycleexpcount,IFNULL(SUM(CASE when convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycle.startHour, ':', LPAD(cycle.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycle.endHour, ':', LPAD(cycle.endMinute, 2, '0'), ':00')), SIGNED) = 0 then 1440 DIV cycle.hoursPerTime ELSE mod(1440 + convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycle.startHour, ':', LPAD(cycle.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycle.endHour, ':', LPAD(cycle.endMinute, 2, '0'), ':00')), SIGNED), 1440) DIV cycle.hoursPerTime END),0) as cyclecount FROM papoint inner JOIN errorrecord ON papoint.pointId = errorrecord.pointId left JOIN cycleexp ON papoint.unid = cycleexp.pointUnid left JOIN cycle ON papoint.unid = cycle.pointUnid GROUP BY papoint.pointId ", new { term = term, term1 = term1, Date = dt2 }).ToList();
+                //                WITH
+                //papoint AS(SELECT unid, unitId,pointId, pointName FROM patrolpoint WHERE patrolpoint.pointId LIKE @term1),
+                //                errorrecord AS(SELECT distinct unitId, pointId FROM patrolerrorrecord WHERE patrolerrorrecord.startTime like @term),
+                //                cycleexp AS(SELECT* FROM patrolcycleexp WHERE (REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(patrolcycleexp.`week`,'六','5'),'日','6') ,'一','0'),'二','1'),'三','2'),'四','3'),'五','4') = WEEKDAY(@Date)) OR(patrolcycleexp.startDate <= @Date AND patrolcycleexp.endDate >= @DATE)),
+                //                cycle AS(SELECT* from patrolcycle)
+                //                SELECT papoint.unitId,papoint.pointId as pointId,
+                //                IFNULL(SUM(CASE when convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycleexp.startHour, ':', LPAD(cycleexp.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycleexp.endHour, ':', LPAD(cycleexp.endMinute, 2, '0'), ':00')), SIGNED) = 0
+                //                then 1440 DIV cycleexp.hoursPerTime
+                //                ELSE mod(1440 + convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycleexp.startHour, ':', LPAD(cycleexp.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycleexp.endHour, ':', LPAD(cycleexp.endMinute, 2, '0'), ':00')), SIGNED), 1440) DIV cycleexp.hoursPerTime END), 0) as cycleexpcount,
+                //                IFNULL(SUM(CASE when convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycle.startHour, ':', LPAD(cycle.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycle.endHour, ':', LPAD(cycle.endMinute, 2, '0'), ':00')), SIGNED) = 0
+                //                then 1440 DIV cycle.hoursPerTime
+                //                ELSE mod(1440 + convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycle.startHour, ':', LPAD(cycle.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycle.endHour, ':', LPAD(cycle.endMinute, 2, '0'), ':00')), SIGNED), 1440) DIV cycle.hoursPerTime END), 0) as cyclecount
+                //                FROM papoint
+                //                inner JOIN errorrecord ON papoint.pointId = errorrecord.pointId and papoint.unitId = errorrecord.unitId
+                //                left JOIN cycleexp ON papoint.unid = cycleexp.pointUnid
+                //                left JOIN cycle ON papoint.unid = cycle.pointUnid GROUP BY papoint.pointId
+                List<patrol_count> patrolcorrecord = conn.Query<patrol_count>("WITH papoint AS(SELECT unid,unitId, pointId, pointName FROM patrolpoint WHERE patrolpoint.pointId LIKE @term1),errorrecord AS(SELECT distinct unitId,pointId FROM patrolerrorrecord WHERE patrolerrorrecord.startTime like @term),cycleexp AS(SELECT * FROM patrolcycleexp WHERE (REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(patrolcycleexp.`week`,'六','5'),'日','6') ,'一','0'),'二','1'),'三','2'),'四','3'),'五','4') = WEEKDAY(@Date)) OR(patrolcycleexp.startDate <= @Date AND patrolcycleexp.endDate >= @Date)),cycle AS(SELECT * from patrolcycle) SELECT papoint.unitId,papoint.pointId as pointId,IFNULL(SUM(CASE when convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycleexp.startHour, ':', LPAD(cycleexp.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycleexp.endHour, ':', LPAD(cycleexp.endMinute, 2, '0'), ':00')), SIGNED) = 0 then 1440 DIV cycleexp.hoursPerTime ELSE mod(1440 + convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycleexp.startHour, ':', LPAD(cycleexp.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycleexp.endHour, ':', LPAD(cycleexp.endMinute, 2, '0'), ':00')), SIGNED), 1440) DIV cycleexp.hoursPerTime END),0) as cycleexpcount,IFNULL(SUM(CASE when convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycle.startHour, ':', LPAD(cycle.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycle.endHour, ':', LPAD(cycle.endMinute, 2, '0'), ':00')), SIGNED) = 0 then 1440 DIV cycle.hoursPerTime ELSE mod(1440 + convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycle.startHour, ':', LPAD(cycle.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycle.endHour, ':', LPAD(cycle.endMinute, 2, '0'), ':00')), SIGNED), 1440) DIV cycle.hoursPerTime END),0) as cyclecount FROM papoint inner JOIN errorrecord ON papoint.pointId = errorrecord.pointId and papoint.unitId = errorrecord.unitId left JOIN cycleexp ON papoint.unid = cycleexp.pointUnid left JOIN cycle ON papoint.unid = cycle.pointUnid GROUP BY papoint.pointId ", new { term = term, term1 = term1, Date = dt2 }).ToList();
 
 
                 ///巡邏點基本檔
-                List<patrolpoint> patrolpoint = conn.Query<patrolpoint>("SELECT pointId,pointName FROM patrolpoint where unitId like @term1", new { term1 = term1 }).ToList();
-                ///SELECT pointId,pointName,COUNT(*) FROM patrolerrorrecord
-                ///WHERE startTime like '2023-10-10%' AND unitId LIKE 'AK%'
-                ///GROUP BY pointId
+                List<patrolpoint> patrolpoint = conn.Query<patrolpoint>("SELECT unitId,pointId,pointName FROM patrolpoint where unitId like @term1", new { term1 = term1 }).ToList();
+                //                SELECT unitId,pointId as patrolPointId,COUNT(*) as COUNT
+                //FROM patrolerrorrecord where startTime like @term and unitId like @term1 GROUP BY pointId
                 ///逾期巡邏統計
-                List<patrol_cal> patrolerrorrecord = conn.Query<patrol_cal>("SELECT pointId as patrolPointId,COUNT(*) as count FROM patrolerrorrecord where startTime like @term and unitId like @term1 GROUP BY pointId", new { term = term, term1 = term1 }).ToList();
+                List<patrol_cal> patrolerrorrecord = conn.Query<patrol_cal>("SELECT unitId,pointId ,COUNT(*) as count FROM patrolerrorrecord where startTime like @term and unitId like @term1 GROUP BY pointId", new { term = term, term1 = term1 }).ToList();
 
-                //              WITH
-                //cte AS(SELECT distinct pointId FROM patrolerrorrecord WHERE startTime like @term AND unitId LIKE @term1)
-                //              , cte1 AS(SELECT patrolPointId, patrolPointName FROM patrolrecord WHERE patrolTime like @term AND unitId LIKE @term1)
-                //               SELECT cte1.patrolPointId,cte1.patrolPointName,COUNT(cte1.patrolPointId) FROM cte1 JOIN cte
-                //               WHERE cte.pointId = cte1.patrolPointId
+                //               WITH
+                //cte AS
+                //(SELECT distinct unitId, pointId FROM patrolerrorrecord WHERE startTime like @term AND unitId LIKE @term1)
+                //               ,cte1 AS(SELECT unitId, patrolPointId, patrolPointName FROM patrolrecord WHERE patrolTime like @term AND unitId LIKE @term1)
+                //               SELECT cte.unitId,cte.pointId,COUNT(cte1.patrolPointId) AS COUNT FROM cte
+                //               left JOIN cte1
+                //               on cte.pointId = cte1.patrolPointId and cte.unitId = cte1.unitId
                 //               GROUP BY cte1.patrolPointId
 
                 ///實際巡邏統計
-                List<patrol_cal> patrolrecord = conn.Query<patrol_cal>("WITH cte AS(SELECT distinct pointId FROM patrolerrorrecord WHERE startTime like @term AND unitId LIKE @term1),cte1 AS(SELECT patrolPointId, patrolPointName FROM patrolrecord WHERE patrolTime like @term AND unitId LIKE @term1) SELECT cte1.patrolPointId,COUNT(cte1.patrolPointId) AS count FROM cte1 JOIN cte WHERE cte.pointId = cte1.patrolPointId GROUP BY cte1.patrolPointId", new { term = term, term1 = term1 }).ToList();
+                List<patrol_cal> patrolrecord = conn.Query<patrol_cal>("WITH cte AS(SELECT distinct unitId,pointId FROM patrolerrorrecord WHERE startTime like @term AND unitId LIKE @term1),cte1 AS(SELECT unitId,patrolPointId, patrolPointName FROM patrolrecord WHERE patrolTime like @term AND unitId LIKE @term1) SELECT cte.unitId,cte.pointId as pointId,COUNT(cte1.patrolPointId) AS count FROM cte left JOIN cte1 on cte.pointId = cte1.patrolPointId  and cte.unitId = cte1.unitId GROUP BY cte1.patrolPointId", new { term = term, term1 = term1 }).ToList();
 
                 var query =
    from errorrecord in patrolerrorrecord
-   join point in patrolpoint on errorrecord.patrolPointId equals point.pointId
-   join record in patrolrecord on errorrecord.patrolPointId equals record.patrolPointId
-   join correcord in patrolcorrecord on errorrecord.patrolPointId equals correcord.patrolPointId
+   join point in patrolpoint on new { errorrecord.pointId, errorrecord.unitId } equals new { point.pointId,point.unitId }
+   //errorrecord.patrolPointId equals point.pointId && errorrecord.unitId equals point.unitId
+   join record in patrolrecord on new {errorrecord.pointId, errorrecord.unitId} equals new {record.pointId, record.unitId}
+   //errorrecord.patrolPointId equals record.patrolPointId && errorrecord.unitId equals record.unitId
+   join correcord in patrolcorrecord on new { errorrecord.pointId, errorrecord.unitId } equals new { correcord.pointId, correcord.unitId }
+   //errorrecord.patrolPointId equals correcord.patrolPointId
    select new patrol_caltable
    {
+       unitId = point.unitId,
        patrolPointId = point.pointId,
        patrolPointName = point.pointName,
        count = errorrecord.count,
@@ -141,6 +160,9 @@ namespace FaceIDAPI.Repository
             body += "<table border='1'>";
             body += "<tr>";
             body += "<th>";
+            body += "駐點代號";
+            body += "</th>";
+            body += "<th>";
             body += "巡邏點代號";
             body += "</th>";
             body += "<th>";
@@ -159,6 +181,9 @@ namespace FaceIDAPI.Repository
             foreach (patrol_caltable obj in data)
             {
                 body += "<tr>";
+                body += "<td>";
+                body += obj.unitId;
+                body += "</td>";
                 body += "<td>";
                 body += obj.patrolPointId;
                 body += "</td>";
@@ -211,7 +236,7 @@ namespace FaceIDAPI.Repository
             string dt2 = dt.AddDays(num1).ToString("yyyy-MM-dd");
             using (var conn = new MySqlConnection(ConnectionStrings))
             {
-                IEnumerable<patrol_caltable> result = conn.Query<patrol_caltable>("WITH rawbyday AS (SELECT pointId,pointName,DATE(startTime) AS startDate,COUNT(*) AS count from patrolerrorrecord WHERE startTime >= @dt2 AND startTime < @dt AND pointId LIKE @term1 GROUP BY pointId,DATE(startTime)),result AS ( SELECT pointId AS patrolPointId,pointName AS patrolPointName,COUNT(pointId) AS count,COUNT(pointId) AS COUNT1,COUNT(pointId) AS COUNT2 FROM  rawbyday GROUP BY pointId)  SELECT * FROM result WHERE COUNT = @num ", new { dt2 = dt2,dt = dt.ToString("yyyy-MM-dd"), term1 = term1 , num = num });
+                IEnumerable<patrol_caltable> result = conn.Query<patrol_caltable>("WITH rawbyday AS (SELECT unitId,pointId,pointName,DATE(startTime) AS startDate,COUNT(*) AS count from patrolerrorrecord WHERE startTime >= @dt2 AND startTime < @dt AND pointId LIKE @term1 GROUP BY pointId,DATE(startTime)),result AS ( SELECT pointId AS patrolPointId,pointName AS patrolPointName,COUNT(pointId) AS count,COUNT(pointId) AS COUNT1,COUNT(pointId) AS COUNT2 FROM  rawbyday GROUP BY pointId)  SELECT * FROM result WHERE COUNT = @num ", new { dt2 = dt2,dt = dt.ToString("yyyy-MM-dd"), term1 = term1 , num = num });
                 return result;
             }
         }

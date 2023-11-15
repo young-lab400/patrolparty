@@ -6,9 +6,9 @@ namespace FaceIDAPI.Models
     {
         //public int unid { get; set; }
         ///// <summary>
-        ///// 駐點代號
-        ///// </summary>
-        //public string unitId { get; set; }
+        /// 駐點代號
+        /// </summary>
+        public string unitId { get; set; }
         /// <summary>
         /// 巡邏點代號
         /// </summary>

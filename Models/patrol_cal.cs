@@ -2,7 +2,8 @@
 {
     public class patrol_cal
     {
-        public string patrolPointId { get; set; }
+        public string unitId { get; set; }
+        public string pointId { get; set; }
         public int count { get; set; }
     }
 }
