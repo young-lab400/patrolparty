@@ -273,5 +273,22 @@ namespace FaceIDAPI.Repository
                 return result;
             }
         }
+        /// <summary>
+        /// 取得num分鐘內的逾期紀錄
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<patrolerrorrecord> GetErrorHistory(string depart, int num)
+        {
+            string term1 = depart + "%";
+            int num1 = 0 - num;
+            string dt2 = DateTime.Now.AddMinutes(num1).ToString("yyyy-MM-dd HH:mm:ss");
+            using (var conn = new MySqlConnection(ConnectionStrings))
+            {
+
+                ///patrolerrorrecord
+                IEnumerable<patrolerrorrecord> result = conn.Query<patrolerrorrecord>("select * from patrolerrorrecord where createdTime > @dt2 and unitId LIKE @term1", new { dt2 = dt2, term1 = term1 });
+                return result;
+            }
+        }
     }
 }
