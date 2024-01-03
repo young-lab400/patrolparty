@@ -123,9 +123,12 @@ namespace FaceIDAPI.Repository
                 //                left JOIN cycle ON papoint.unid = cycle.pointUnid GROUP BY papoint.pointId
                 List<patrol_count> patrolcorrecord = conn.Query<patrol_count>("WITH papoint AS(SELECT unid,unitId, pointId, pointName FROM patrolpoint WHERE patrolpoint.pointId LIKE @term1),errorrecord AS(SELECT distinct unitId,pointId FROM patrolerrorrecord WHERE patrolerrorrecord.startTime >= @dt3 and endtime <= @dt4),cycleexp AS(SELECT * FROM patrolcycleexp WHERE (REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(patrolcycleexp.`week`,'六','5'),'日','6') ,'一','0'),'二','1'),'三','2'),'四','3'),'五','4') = WEEKDAY(@Date)) OR(patrolcycleexp.startDate <= @Date AND patrolcycleexp.endDate >= @Date)),cycle AS(SELECT * from patrolcycle) SELECT papoint.unitId,papoint.pointId as pointId,IFNULL(SUM(CASE when convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycleexp.startHour, ':', LPAD(cycleexp.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycleexp.endHour, ':', LPAD(cycleexp.endMinute, 2, '0'), ':00')), SIGNED) = 0 then 1440 DIV cycleexp.hoursPerTime ELSE mod(1440 + convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycleexp.startHour, ':', LPAD(cycleexp.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycleexp.endHour, ':', LPAD(cycleexp.endMinute, 2, '0'), ':00')), SIGNED), 1440) DIV cycleexp.hoursPerTime END),0) as cycleexpcount,IFNULL(SUM(CASE when convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycle.startHour, ':', LPAD(cycle.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycle.endHour, ':', LPAD(cycle.endMinute, 2, '0'), ':00')), SIGNED) = 0 then 1440 DIV cycle.hoursPerTime ELSE mod(1440 + convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycle.startHour, ':', LPAD(cycle.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycle.endHour, ':', LPAD(cycle.endMinute, 2, '0'), ':00')), SIGNED), 1440) DIV cycle.hoursPerTime END),0) as cyclecount FROM papoint inner JOIN errorrecord ON papoint.pointId = errorrecord.pointId and papoint.unitId = errorrecord.unitId left JOIN cycleexp ON papoint.unid = cycleexp.pointUnid left JOIN cycle ON papoint.unid = cycle.pointUnid GROUP BY papoint.pointId ", new { term = term, term1 = term1, Date = dt2,dt3 = dt3,dt4 = dt4 }).ToList();
 
-
+//                SELECT patrolpoint.unitId,unit.unitName,patrolpoint.pointId,patrolpoint.pointName FROM patrolpoint
+//JOIN unit ON SUBSTRING_INDEX(unit.fullUnitId, '$', -1) = patrolpoint.unitId
+//                 where patrolpoint.unitId LIKE @term1 AND unit.unitLevel = '4'
                 ///巡邏點基本檔
-                List<patrolpoint> patrolpoint = conn.Query<patrolpoint>("SELECT unitId,pointId,pointName FROM patrolpoint where unitId like @term1", new { term1 = term1 }).ToList();
+                List<patrolpoint> patrolpoint = conn.Query<patrolpoint>("SELECT patrolpoint.unitId,unit.unitName,patrolpoint.pointId,patrolpoint.pointName FROM patrolpoint JOIN unit ON SUBSTRING_INDEX(unit.fullUnitId, '$', -1) = patrolpoint.unitId where patrolpoint.unitId LIKE @term1 AND unit.unitLevel = '4'", new { term1 = term1 }).ToList();
+                
                 //                SELECT unitId,pointId as patrolPointId,COUNT(*) as COUNT
                 //FROM patrolerrorrecord where startTime >= @dt3 and endtime <= @dt4 and unitId like @term1 GROUP BY pointId
                 ///逾期巡邏統計
@@ -154,6 +157,7 @@ namespace FaceIDAPI.Repository
    select new patrol_caltable
    {
        unitId = point.unitId,
+       unitName = point.unitName,
        patrolPointId = point.pointId,
        patrolPointName = point.pointName,
        count = errorrecord.count,
@@ -196,6 +200,9 @@ namespace FaceIDAPI.Repository
             body += "駐點代號";
             body += "</th>";
             body += "<th>";
+            body += "駐點名稱";
+            body += "</th>";
+            body += "<th>";
             body += "巡邏點代號";
             body += "</th>";
             body += "<th>";
@@ -216,6 +223,9 @@ namespace FaceIDAPI.Repository
                 body += "<tr>";
                 body += "<td>";
                 body += obj.unitId;
+                body += "</td>";
+                body += "<td>";
+                body += obj.unitName;
                 body += "</td>";
                 body += "<td>";
                 body += obj.patrolPointId;
@@ -246,7 +256,7 @@ namespace FaceIDAPI.Repository
             // attachment = new System.Net.Mail.Attachment("c:/textfile.txt");
             // mail.Attachments.Add(attachment);
             SmtpServer.Port = 25;
-            SmtpServer.Credentials = new System.Net.NetworkCredential("hr_system@csccss.com.tw", "16099725#css");
+            SmtpServer.Credentials = new System.Net.NetworkCredential("hr_system@csccss.com.tw", "1qaz#16099725");
             SmtpServer.EnableSsl = true;
             try
             {

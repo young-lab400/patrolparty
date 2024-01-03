@@ -10,6 +10,11 @@ namespace FaceIDAPI.Models
         /// </summary>
         public string unitId { get; set; }
         /// <summary>
+        /// 駐點名稱
+        /// </summary>
+        public string unitName { get; set; }
+        
+        /// <summary>
         /// 巡邏點代號
         /// </summary>
         public string pointId { get; set; }
