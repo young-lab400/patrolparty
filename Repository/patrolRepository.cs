@@ -246,7 +246,8 @@ namespace FaceIDAPI.Repository
             }
             body += "</table>";
 
-            mail.From = new MailAddress("hr_system@csccss.com.tw", "hr_system@csccss.com.tw");
+            //mail.From = new MailAddress("hr_system@csccss.com.tw", "hr_system@csccss.com.tw");
+            mail.From = new MailAddress("ca_system@csccss.com.tw", "ca_system@csccss.com.tw");
             mail.To.Add(new MailAddress("S66995@csccss.com.tw", "廖健智"));
             mail.To.Add(new MailAddress("S33141@csccss.com.tw", "林榮皇"));
             mail.Subject = "巡邏逾期情形";
@@ -256,7 +257,8 @@ namespace FaceIDAPI.Repository
             // attachment = new System.Net.Mail.Attachment("c:/textfile.txt");
             // mail.Attachments.Add(attachment);
             SmtpServer.Port = 25;
-            SmtpServer.Credentials = new System.Net.NetworkCredential("hr_system@csccss.com.tw", "1qaz#16099725");
+            //SmtpServer.Credentials = new System.Net.NetworkCredential("hr_system@csccss.com.tw", "1qaz#16099725");
+            SmtpServer.Credentials = new System.Net.NetworkCredential("ca_system@csccss.com.tw", "16099725#css");
             SmtpServer.EnableSsl = true;
             try
             {
