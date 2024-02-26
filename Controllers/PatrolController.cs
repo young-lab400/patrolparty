@@ -92,8 +92,8 @@ namespace FaceIDAPI.Controllers
                         Response.StatusCode = 404;
                         return "統計錯誤";
                     }
-                    string mailresult = this._patrolRepository.SendEmail(dt2.AddDays(-1), result2);
-                    //return Ok(result2);
+                    string mailresult = this._patrolRepository.SendEmail(dt2.AddDays(-1), result2,depart);
+                    return Ok(mailresult);
                 }
             }
             catch (Exception ex)

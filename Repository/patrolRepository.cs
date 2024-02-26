@@ -49,7 +49,7 @@ namespace FaceIDAPI.Repository
                 //                inner JOIN errorrecord ON papoint.pointId = errorrecord.pointId and papoint.unitId = errorrecord.unitId
                 //                left JOIN cycleexp ON papoint.unid = cycleexp.pointUnid
                 //                left JOIN cycle ON papoint.unid = cycle.pointUnid GROUP BY papoint.pointId
-                List<patrol_count> patrolcorrecord = conn.Query<patrol_count>("WITH papoint AS(SELECT unid,unitId, pointId, pointName FROM patrolpoint WHERE patrolpoint.pointId LIKE @term1),errorrecord AS(SELECT distinct unitId,pointId FROM patrolerrorrecord WHERE patrolerrorrecord.startTime >= @dt3 and endtime <= @dt4),cycleexp AS(SELECT * FROM patrolcycleexp WHERE (REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(patrolcycleexp.`week`,'六','5'),'日','6') ,'一','0'),'二','1'),'三','2'),'四','3'),'五','4') = WEEKDAY(@Date)) OR(patrolcycleexp.startDate <= @Date AND patrolcycleexp.endDate >= @Date)),cycle AS(SELECT * from patrolcycle) SELECT papoint.unitId,papoint.pointId as pointId,IFNULL(SUM(CASE when convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycleexp.startHour, ':', LPAD(cycleexp.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycleexp.endHour, ':', LPAD(cycleexp.endMinute, 2, '0'), ':00')), SIGNED) = 0 then 1440 DIV cycleexp.hoursPerTime ELSE mod(1440 + convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycleexp.startHour, ':', LPAD(cycleexp.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycleexp.endHour, ':', LPAD(cycleexp.endMinute, 2, '0'), ':00')), SIGNED), 1440) DIV cycleexp.hoursPerTime END),0) as cycleexpcount,IFNULL(SUM(CASE when convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycle.startHour, ':', LPAD(cycle.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycle.endHour, ':', LPAD(cycle.endMinute, 2, '0'), ':00')), SIGNED) = 0 then 1440 DIV cycle.hoursPerTime ELSE mod(1440 + convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycle.startHour, ':', LPAD(cycle.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycle.endHour, ':', LPAD(cycle.endMinute, 2, '0'), ':00')), SIGNED), 1440) DIV cycle.hoursPerTime END),0) as cyclecount FROM papoint inner JOIN errorrecord ON papoint.pointId = errorrecord.pointId and papoint.unitId = errorrecord.unitId left JOIN cycleexp ON papoint.unid = cycleexp.pointUnid left JOIN cycle ON papoint.unid = cycle.pointUnid GROUP BY papoint.pointId ", new { term = term, term1 = term1, Date = dt2 }).ToList();
+                List<patrol_count> patrolcorrecord = conn.Query<patrol_count>("WITH papoint AS(SELECT unid,unitId, pointId, pointName FROM patrolpoint WHERE patrolpoint.pointId LIKE @term1),errorrecord AS(SELECT distinct unitId,pointId FROM patrolerrorrecord WHERE patrolerrorrecord.startTime >= @dt3 and endtime <= @dt4),cycleexp AS(SELECT * FROM patrolcycleexp WHERE (REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(patrolcycleexp.`week`,'六','5'),'日','6') ,'一','0'),'二','1'),'三','2'),'四','3'),'五','4') = WEEKDAY(@Date)) OR(patrolcycleexp.startDate <= @Date AND patrolcycleexp.endDate >= @Date)),cycle AS(SELECT * from patrolcycle) SELECT papoint.unitId,papoint.pointId as pointId,IFNULL(SUM(CASE when convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycleexp.startHour, ':', LPAD(cycleexp.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycleexp.endHour, ':', LPAD(cycleexp.endMinute, 2, '0'), ':00')), SIGNED) = 0 then 1440 DIV cycleexp.hoursPerTime ELSE mod(1440 + convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycleexp.startHour, ':', LPAD(cycleexp.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycleexp.endHour, ':', LPAD(cycleexp.endMinute, 2, '0'), ':00')), SIGNED), 1440) DIV cycleexp.hoursPerTime END),0) as cycleexpcount,IFNULL(SUM(CASE when convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycle.startHour, ':', LPAD(cycle.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycle.endHour, ':', LPAD(cycle.endMinute, 2, '0'), ':00')), SIGNED) = 0 then 1440 DIV cycle.hoursPerTime ELSE mod(1440 + convert(TIMESTAMPDIFF(MINUTE, CONCAT(@Date, ' ', cycle.startHour, ':', LPAD(cycle.startMinute, 2, '0'), ':00'), CONCAT(@Date, ' ', cycle.endHour, ':', LPAD(cycle.endMinute, 2, '0'), ':00')), SIGNED), 1440) DIV cycle.hoursPerTime END),0) as cyclecount FROM papoint inner JOIN errorrecord ON papoint.pointId = errorrecord.pointId and papoint.unitId = errorrecord.unitId left JOIN cycleexp ON papoint.unid = cycleexp.pointUnid left JOIN cycle ON papoint.unid = cycle.pointUnid GROUP BY papoint.pointId ", new { term = term, term1 = term1, Date = dt2,dt3=dt3 }).ToList();
                 return patrolcorrecord;
             }
         }
@@ -188,7 +188,7 @@ namespace FaceIDAPI.Repository
                 return ex.ToString();
             }
         }
-        public string SendEmail(DateTime dt, IEnumerable<patrol_caltable> data)
+        public string SendEmail(DateTime dt, IEnumerable<patrol_caltable> data,string depart)
         {
 
             MailMessage mail = new MailMessage();
@@ -245,11 +245,41 @@ namespace FaceIDAPI.Repository
                 body += "</tr>";
             }
             body += "</table>";
+            try
+            {
+                IEnumerable<noticegroup> noticegroup = null;
+            using (var conn = new MySqlConnection(ConnectionStrings))
+            {
+                noticegroup = conn.Query<noticegroup>("SELECT groupId,emails FROM noticegroup WHERE groupId = @term1", new { term1 = depart });
+            }
+            IEnumerable<noticeemail> noticeemail = null;
+            using (var conn = new MySqlConnection(ConnectionStrings))
+            {
+                noticeemail = conn.Query<noticeemail>("SELECT unid,mailAddress,remark  FROM email WHERE ACTIVATE = 1");
+            }
 
+            foreach (var email in noticegroup)
+            {
+                if(email.groupId==depart)
+                {
+                    string[] words = email.emails.Split('☆');
+                    foreach (var word in words)
+                    {
+                        foreach (var unid in noticeemail)
+                        {
+                            if (word == unid.unid)
+                            {
+                                mail.To.Add(new MailAddress(unid.mailAddress, unid.remark));
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
             //mail.From = new MailAddress("hr_system@csccss.com.tw", "hr_system@csccss.com.tw");
             mail.From = new MailAddress("ca_system@csccss.com.tw", "ca_system@csccss.com.tw");
-            mail.To.Add(new MailAddress("S66995@csccss.com.tw", "廖健智"));
-            mail.To.Add(new MailAddress("S33141@csccss.com.tw", "林榮皇"));
+            //mail.To.Add(new MailAddress("S66995@csccss.com.tw", "廖健智"));
+            //mail.To.Add(new MailAddress("S33141@csccss.com.tw", "林榮皇"));
             mail.Subject = "巡邏逾期情形";
             mail.Body = body;
             mail.IsBodyHtml = true;
@@ -260,8 +290,7 @@ namespace FaceIDAPI.Repository
             //SmtpServer.Credentials = new System.Net.NetworkCredential("hr_system@csccss.com.tw", "1qaz#16099725");
             SmtpServer.Credentials = new System.Net.NetworkCredential("ca_system@csccss.com.tw", "16099725#css");
             SmtpServer.EnableSsl = true;
-            try
-            {
+            
                 SmtpServer.Send(mail);
                 return "寄信成功";
             }

@@ -2327,11 +2327,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Dev\\巡邏系統\\patrolparty\\patrolparty\\FaceIDAPI.csproj",
+      "projectUniqueName": "D:\\Dev\\巡邏系統\\patrolparty\\FaceIDAPI.csproj",
       "projectName": "FaceIDAPI",
-      "projectPath": "D:\\Dev\\巡邏系統\\patrolparty\\patrolparty\\FaceIDAPI.csproj",
+      "projectPath": "D:\\Dev\\巡邏系統\\patrolparty\\FaceIDAPI.csproj",
       "packagesPath": "C:\\Users\\sp3060\\.nuget\\packages\\",
-      "outputPath": "D:\\Dev\\巡邏系統\\patrolparty\\patrolparty\\obj\\",
+      "outputPath": "D:\\Dev\\巡邏系統\\patrolparty\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\sp3060\\AppData\\Roaming\\NuGet\\NuGet.Config",

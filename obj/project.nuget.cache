@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Rdu+OoskXtCEJ8YJqku6ffwvNwnL9txNmXzlrSOLQj5cXQP1WZ4erpklkd5TIotGRIAjIFWgiQlRpNU8+3AZvg==",
+  "dgSpecHash": "BamfybxQ7uBov0t5RZlQ/q7e7MkHiwQguZbf+5SA1OpyUi4hgJdyzxGijORrC5pwjuUVi5MJTyX6hs1S//rYVg==",
   "success": true,
-  "projectFilePath": "D:\\Dev\\巡邏系統\\patrolparty\\patrolparty\\FaceIDAPI.csproj",
+  "projectFilePath": "D:\\Dev\\巡邏系統\\patrolparty\\FaceIDAPI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\sp3060\\.nuget\\packages\\dapper\\2.0.123\\dapper.2.0.123.nupkg.sha512",
     "C:\\Users\\sp3060\\.nuget\\packages\\microsoft.extensions.configuration\\3.1.22\\microsoft.extensions.configuration.3.1.22.nupkg.sha512",
