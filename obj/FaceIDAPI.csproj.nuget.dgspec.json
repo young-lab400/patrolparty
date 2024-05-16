@@ -34,6 +34,11 @@
           "warnAsError": [
             "NU1605"
           ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
         }
       },
       "frameworks": {
@@ -42,11 +47,11 @@
           "dependencies": {
             "Dapper": {
               "target": "Package",
-              "version": "[2.0.123, )"
+              "version": "[2.1.35, )"
             },
             "MySqlConnector": {
               "target": "Package",
-              "version": "[2.2.7, )"
+              "version": "[2.3.7, )"
             },
             "Newtonsoft.Json": {
               "target": "Package",
@@ -58,7 +63,7 @@
             },
             "System.Data.SqlClient": {
               "target": "Package",
-              "version": "[4.8.3, )"
+              "version": "[4.8.6, )"
             }
           },
           "imports": [
@@ -80,7 +85,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.403\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.202\\RuntimeIdentifierGraph.json"
         }
       }
     }

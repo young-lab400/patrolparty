@@ -93,7 +93,7 @@ namespace FaceIDAPI.Controllers
                         return "統計錯誤";
                     }
                     string mailresult = this._patrolRepository.SendEmail(dt2.AddDays(-1), result2,depart);
-                    return Ok(mailresult);
+                    //return Ok(mailresult);
                 }
             }
             catch (Exception ex)
@@ -161,7 +161,7 @@ namespace FaceIDAPI.Controllers
                 {
                     //&& item.depart == depart)
 
-                    if (item.key == "Linetoken")
+                    if (item.key == "Linetoken" && item.depart == depart)
                     {
                         string linetoken = item.value;
                         string msg = "";

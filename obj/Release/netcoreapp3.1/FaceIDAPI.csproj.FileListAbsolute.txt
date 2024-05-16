@@ -172,7 +172,6 @@ D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\staticwebassets\msbuil
 D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\staticwebassets\msbuild.buildMultiTargeting.FaceIDAPI.props
 D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\staticwebassets\msbuild.buildTransitive.FaceIDAPI.props
 D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\FaceIDAPI.RazorTargetAssemblyInfo.cache
-D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\FaceIDAPI.csproj.CopyComplete
 D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\FaceIDAPI.genruntimeconfig.cache
 D:\Dev\巡邏系統\patrolparty\bin\Release\netcoreapp3.1\APP_DATA\data.json
 D:\Dev\巡邏系統\patrolparty\bin\Release\netcoreapp3.1\Newtonsoft.Json.dll
@@ -226,3 +225,6 @@ D:\Dev\巡邏系統\patrolparty\patrolparty\obj\Release\netcoreapp3.1\FaceIDAPI.
 D:\Dev\巡邏系統\patrolparty\patrolparty\obj\Release\netcoreapp3.1\FaceIDAPI.dll
 D:\Dev\巡邏系統\patrolparty\patrolparty\obj\Release\netcoreapp3.1\FaceIDAPI.pdb
 D:\Dev\巡邏系統\patrolparty\patrolparty\obj\Release\netcoreapp3.1\FaceIDAPI.genruntimeconfig.cache
+D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\FaceIDAPI.sourcelink.json
+D:\Dev\巡邏系統\patrolparty\obj\Release\netcoreapp3.1\FaceIDAPI.csproj.Up2Date
+D:\Dev\巡邏系統\patrolparty\bin\Release\netcoreapp3.1\Microsoft.Extensions.Logging.Abstractions.dll

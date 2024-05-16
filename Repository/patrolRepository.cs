@@ -1,6 +1,5 @@
 ﻿using Dapper;
 using FaceIDAPI.Models;
-using FaceIDAPI.Models.Resp;
 using Microsoft.AspNetCore.Mvc;
 
 using MySqlConnector;
