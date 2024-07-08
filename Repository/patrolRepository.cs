@@ -314,10 +314,42 @@ namespace FaceIDAPI.Repository
             }
         }
         /// <summary>
+        /// 取得AS0212長達1天以上的逾期紀錄
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<patrol_caltable> geterrorhistory_test(DateTime dt, string depart, int num,string patrolpoint)
+        {
+            string term1 = depart + "%";
+            int num1 = 0 - num;
+            string dt2 = dt.AddDays(num1).ToString("yyyy-MM-dd");
+            using (var conn = new MySqlConnection(ConnectionStrings))
+            {
+                IEnumerable<patrol_caltable> result = conn.Query<patrol_caltable>("WITH rawbyday AS (SELECT unitId,pointId,pointName,DATE(startTime) AS startDate,COUNT(*) AS count from patrolerrorrecord WHERE startTime >= @dt2 AND startTime < @dt AND pointId LIKE @term1 GROUP BY pointId,DATE(startTime)),result AS ( SELECT pointId AS patrolPointId,pointName AS patrolPointName,COUNT(pointId) AS count,COUNT(pointId) AS COUNT1,COUNT(pointId) AS COUNT2 FROM  rawbyday GROUP BY pointId)  SELECT * FROM result WHERE COUNT = @num ", new { dt2 = dt2, dt = dt.ToString("yyyy-MM-dd"), term1 = term1, num = num });
+                return result;
+            }
+        }
+        /// <summary>
         /// 取得num分鐘內的逾期紀錄
         /// </summary>
         /// <returns></returns>
         public IEnumerable<patrolerrorrecord> GetErrorHistory(string depart, int num)
+        {
+            string term1 = depart + "%";
+            int num1 = 0 - num;
+            string dt2 = DateTime.Now.AddMinutes(num1).ToString("yyyy-MM-dd HH:mm:ss");
+            using (var conn = new MySqlConnection(ConnectionStrings))
+            {
+
+                ///patrolerrorrecord
+                IEnumerable<patrolerrorrecord> result = conn.Query<patrolerrorrecord>("select * from patrolerrorrecord where createdTime > @dt2 and unitId LIKE @term1", new { dt2 = dt2, term1 = term1 });
+                return result;
+            }
+        }
+        /// <summary>
+        /// 取得num分鐘內的逾期紀錄
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<patrolerrorrecord> GetErrorHistory_test(string depart, int num)
         {
             string term1 = depart + "%";
             int num1 = 0 - num;

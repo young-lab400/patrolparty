@@ -138,6 +138,53 @@ namespace FaceIDAPI.Controllers
             }
         }
         /// <summary>
+        /// 巡邏點查詢
+        /// </summary>
+        /// <param name="depart">巡邏點查詢</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("Get_patrolpoint_test")]
+        public ActionResult<string> Get_patrolpoint_test(string dt, string depart, int num, string patrolpoint)
+        {
+            DateTime dt2 = DateTime.Parse(dt);
+            //get webrootpath
+            string webRootPath = _hostingEnvironment.WebRootPath;
+            try
+            {
+                IEnumerable<patrol_caltable> result = this._patrolRepository.geterrorhistory_test(dt2, depart, num, patrolpoint);
+
+                StreamReader reader = new StreamReader(webRootPath + "/APIpub/APP_DATA/data.json");
+
+                var json = reader.ReadToEnd();
+                string Lineresult = "空";
+                List<Jsonobject> Jobjs = JsonConvert.DeserializeObject<List<Jsonobject>>(json);
+                foreach (var item in Jobjs)
+                {
+                    if (item.key == "Linetoken" && item.depart == depart)
+                    {
+
+                        string linetoken = item.value;
+                        string msg = "";
+                        if (result.Count() > 0)
+                        {
+                            foreach (var rawdata in result)
+                            {
+                                //msg += rawdata.patrolPointId + " " +rawdata.patrolPointName+" " +rawdata.count + "次";
+                                msg += rawdata.patrolPointId + ",";
+                            }
+                            msg += " 連續" + num + "天逾期";
+                            Lineresult = this._patrolRepository.LineNotify(linetoken, msg);
+                        }
+                    }
+                }
+                return Ok(Lineresult);
+            }
+            catch (Exception ex)
+            {
+                return Ok(ex.Message);
+            }
+        }
+        /// <summary>
         /// 逾期即時通知
         /// </summary>
         /// <param name="depart">單位</param>
@@ -146,6 +193,57 @@ namespace FaceIDAPI.Controllers
         [HttpPost]
         [Route("Get_ErrorPatrol")]
         public ActionResult<string> GetErrorHistory(string depart, int num)
+        {
+            //get webrootpath
+            string webRootPath = _hostingEnvironment.WebRootPath;
+            try
+            {
+                IEnumerable<patrolerrorrecord> result = this._patrolRepository.GetErrorHistory(depart, num);
+
+                StreamReader reader = new StreamReader(webRootPath + "/APIpub/APP_DATA/data.json");
+                var json = reader.ReadToEnd();
+                string Lineresult = "空";
+                List<Jsonobject> Jobjs = JsonConvert.DeserializeObject<List<Jsonobject>>(json);
+                foreach (var item in Jobjs)
+                {
+                    //&& item.depart == depart)
+
+                    if (item.key == "Linetoken" && item.depart == depart)
+                    {
+                        string linetoken = item.value;
+                        string msg = "";
+                        if (result.Count() > 0)
+                        {
+                            foreach (var rawdata in result)
+                            {
+
+                                //msg += rawdata.unitId + ",";
+                                msg += rawdata.pointId + ",";
+                                //msg += rawdata.pointName + ",";
+                                //msg += rawdata.startTime + ",";
+                                msg += rawdata.endTime.ToString("HH:mm") + ",  ";
+                            }
+
+                            Lineresult = this._patrolRepository.LineNotify(linetoken, msg);
+                        }
+                    }
+                }
+                return Ok(Lineresult);
+            }
+            catch (Exception ex)
+            {
+                return Ok(ex.Message);
+            }
+        }
+        /// <summary>
+        /// 逾期即時通知AS021
+        /// </summary>
+        /// <param name="depart">單位</param>
+        /// <param name="num">分鐘</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("GetErrorHistory_test")]
+        public ActionResult<string> GetErrorHistory_test(string depart, int num)
         {
             //get webrootpath
             string webRootPath = _hostingEnvironment.WebRootPath;
