@@ -38,7 +38,7 @@ namespace FaceIDAPI.Controllers
             _hostingEnvironment = hostingEnvironment;
         }
         /// <summary>
-        /// 巡邏點查詢
+        /// 巡邏點查詢，逾期通知，單位駐點連續X天出現異常
         /// </summary>
         /// <param name="depart">巡邏點查詢</param>
         /// <returns></returns>
@@ -138,7 +138,7 @@ namespace FaceIDAPI.Controllers
             }
         }
         /// <summary>
-        /// 巡邏點查詢
+        ///  逾期通知，單位駐點連續X天出現異常
         /// </summary>
         /// <param name="depart">巡邏點查詢</param>
         /// <returns></returns>
@@ -185,7 +185,7 @@ namespace FaceIDAPI.Controllers
             }
         }
         /// <summary>
-        /// 逾期即時通知
+        /// 逾期即時通知，查詢X單位X分鐘內逾期紀錄
         /// </summary>
         /// <param name="depart">單位</param>
         /// <param name="num">分鐘</param>
@@ -236,7 +236,7 @@ namespace FaceIDAPI.Controllers
             }
         }
         /// <summary>
-        /// 逾期即時通知AS021
+        /// 逾期即時通知AS021，查詢X單位X分鐘內逾期紀錄
         /// </summary>
         /// <param name="depart">單位</param>
         /// <param name="num">分鐘</param>

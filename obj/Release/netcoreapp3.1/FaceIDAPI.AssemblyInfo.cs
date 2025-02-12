@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FaceIDAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+283bc5012cfeb3e2ba253deb30163fb324406634")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c56abbfd51240f541d86bc6e63b7abf3ae670ae4")]
 [assembly: System.Reflection.AssemblyProductAttribute("FaceIDAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FaceIDAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -20,6 +20,12 @@ namespace FaceIDAPI.Repository
 {
     public class patrolRepository : MysqlHelper
     {
+        /// <summary>
+        /// 計算應巡次數
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="depart"></param>
+        /// <returns></returns>
         public IEnumerable<patrol_count> Get_pointList1(DateTime dt, string depart)
         {
             using (var conn = new MySqlConnection(ConnectionStrings))
@@ -52,6 +58,12 @@ namespace FaceIDAPI.Repository
                 return patrolcorrecord;
             }
         }
+        /// <summary>
+        /// 查出逾期資料筆數量
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="depart"></param>
+        /// <returns></returns>
         public IEnumerable<patrol_cal> Get_pointList2(DateTime dt, string depart)
         {
             using (var conn = new MySqlConnection(ConnectionStrings))
@@ -68,6 +80,7 @@ namespace FaceIDAPI.Repository
                 return patrolerrorrecord;
             }
         }
+        ///計算實際巡邏統計
         public IEnumerable<patrol_cal> Get_pointList3(DateTime dt, string depart)
         {
             using (var conn = new MySqlConnection(ConnectionStrings))
